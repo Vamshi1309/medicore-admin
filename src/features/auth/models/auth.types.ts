@@ -1,10 +1,6 @@
-export interface LoginRequest {
-  phoneNumber: string;
+export interface StaffLoginRequest {
+  staffId: string;
   password: string;
-}
-
-export interface RegisterRequest extends LoginRequest {
-  name: string;
 }
 
 export interface AuthTokens {

@@ -20,8 +20,7 @@ export const setSessionExpiredHandler = (fn: () => void) => {
 
 // Endpoints that must never carry a token (and never trigger a refresh)
 const PUBLIC_ENDPOINTS: string[] = [
-  Endpoints.login,
-  Endpoints.register,
+  Endpoints.staffLogin,
   Endpoints.refresh,
 ];
 

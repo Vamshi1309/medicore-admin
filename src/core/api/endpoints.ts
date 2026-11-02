@@ -1,9 +1,8 @@
 export const Endpoints = {
-    login: '/auth/login',
-    register: '/auth/register',
+    staffLogin: '/auth/staff/login',
     refresh: '/auth/refresh',
     me: '/auth/me',
-    logout: '/auth/logout'
+    logout: '/auth/logout',
 } as const;
 
 export const PicsumEndpoints = {

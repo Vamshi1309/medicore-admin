@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "MyStarter",
-    "slug": "MyStarter",
-    "scheme": "mystarter",
+    "name": "MediCore Admin",
+    "slug": "medicore-admin",
+    "scheme": "medicoreadmin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

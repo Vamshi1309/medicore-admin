@@ -6,11 +6,14 @@ interface Props {
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
-  variant?: 'primary' | 'outline';
+  variant?: 'primary' | 'outline' | 'danger';
 }
 
 export default function AppButton({ title, onPress, loading, disabled, variant = 'primary' }: Props) {
   const isOutline = variant === 'outline';
+  const isDanger = variant === 'danger';
+  const textColor = isDanger ? Colors.error : isOutline ? Colors.primary : Colors.white;
+
   return (
     <Pressable
       onPress={onPress}
@@ -18,14 +21,15 @@ export default function AppButton({ title, onPress, loading, disabled, variant =
       style={({ pressed }) => [
         styles.btn,
         isOutline && styles.outline,
+        isDanger && styles.danger,
         (disabled || loading) && styles.disabled,
         pressed && { opacity: 0.85 },
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isOutline ? Colors.primary : Colors.white} />
+        <ActivityIndicator color={textColor} />
       ) : (
-        <Text style={[styles.text, isOutline && { color: Colors.primary }]}>{title}</Text>
+        <Text style={[styles.text, { color: textColor }]}>{title}</Text>
       )}
     </Pressable>
   );
@@ -35,11 +39,12 @@ const styles = StyleSheet.create({
   btn: {
     backgroundColor: Colors.primary,
     height: 50,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   outline: { backgroundColor: 'transparent', borderWidth: 1, borderColor: Colors.primary },
+  danger: { backgroundColor: Colors.errorSoft },
   disabled: { opacity: 0.6 },
-  text: { color: Colors.white, fontSize: 16, fontWeight: '600' },
+  text: { fontSize: 16, fontWeight: '600' },
 });

@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { authRepository } from '../repository/authRepository';
+import { ME_KEY } from '../hooks/useMe';
 import { tokenStorage } from '@/core/storage/tokenStorage';
 import { setSessionExpiredHandler } from '@/core/api/apiClient';
 import { toAppError } from '@/core/errors/errorHandler';
 import { queryClient } from '@/core/api/queryClient';
+import { ADMIN_ROLE } from '@/constants/roles';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -12,8 +14,7 @@ interface AuthState {
   error: string | null;
 
   bootstrap: () => Promise<void>;
-  login: (phone: string, password: string) => Promise<boolean>;
-  register: (name: string, phone: string, password: string) => Promise<boolean>;
+  login: (staffId: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
@@ -24,39 +25,45 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   error: null,
 
-  // On app start: a saved token means logged in
+  // On app start: validate the saved session while the splash screen is still showing
   bootstrap: async () => {
     try {
       const token = await tokenStorage.getAccess();
-      set({ isAuthenticated: !!token });
+      if (token) {
+        const me = await authRepository.getMe(); // refreshes automatically if expired
+        if (me.role === ADMIN_ROLE) {
+          queryClient.setQueryData(ME_KEY, me);
+          set({ isAuthenticated: true });
+        } else {
+          await tokenStorage.clear();
+        }
+      }
+    } catch {
+      // Invalid or unreachable: stay logged out. A failed refresh already cleared the tokens.
     } finally {
       set({ isHydrated: true });
     }
   },
 
-  login: async (phone, password) => {
+  login: async (staffId, password) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await authRepository.login({ phoneNumber: phone, password });
-      await tokenStorage.save(res.accessToken, res.refreshToken);
-      set({ isAuthenticated: true });
-      return true;
-    } catch (e) {
-      set({ error: toAppError(e).message });
-      return false;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+      const tokens = await authRepository.staffLogin({ staffId, password });
+      await tokenStorage.save(tokens.accessToken, tokens.refreshToken);
 
-  register: async (name, phone, password) => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await authRepository.register({ name, phoneNumber: phone, password });
-      await tokenStorage.save(res.accessToken, res.refreshToken);
+      const me = await authRepository.getMe();
+      if (me.role !== ADMIN_ROLE) {
+        await authRepository.logOut().catch(() => { }); // end the session we just opened
+        await tokenStorage.clear();
+        set({ error: 'This app is for administrators only.' });
+        return false;
+      }
+
+      queryClient.setQueryData(ME_KEY, me); // Home reads it from the cache, no second call
       set({ isAuthenticated: true });
       return true;
     } catch (e) {
+      await tokenStorage.clear();
       set({ error: toAppError(e).message });
       return false;
     } finally {
@@ -66,7 +73,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
-      await authRepository.logOut();   // tell the backend to end the session
+      await authRepository.logOut(); // tell the backend to end the session
     } catch {
       // ignore: the user must be logged out locally either way
     } finally {
@@ -79,6 +86,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   clearError: () => set({ error: null }),
 }));
 
+// When token refresh fails, apiClient calls this to log the user out
 setSessionExpiredHandler(() => {
   useAuthStore.setState({ isAuthenticated: false });
   queryClient.clear();
