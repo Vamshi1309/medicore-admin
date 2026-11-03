@@ -7,6 +7,8 @@ interface Props {
   uri?: string | null;
   name?: string;
   size?: number;
+  background?: string;
+  textColor?: string;
 }
 
 const getInitials = (name?: string) =>
@@ -17,15 +19,16 @@ const getInitials = (name?: string) =>
     .map((w) => w[0]?.toUpperCase() ?? '')
     .join('') || '?';
 
-export default function Avatar({ uri, name, size = 96 }: Props) {
+export default function Avatar({ uri, name, size = 96, background, textColor }: Props) {
   const [failed, setFailed] = useState(false);
   const shape = { width: size, height: size, borderRadius: size / 2 };
 
-  // No URL, or it failed to load: show initials
   if (!uri || failed) {
     return (
-      <View style={[styles.fallback, shape]}>
-        <Text style={[styles.initials, { fontSize: size * 0.36 }]}>{getInitials(name)}</Text>
+      <View style={[styles.fallback, shape, { backgroundColor: background ?? Colors.primary }]}>
+        <Text style={{ fontSize: size * 0.36, fontWeight: '700', color: textColor ?? Colors.white }}>
+          {getInitials(name)}
+        </Text>
       </View>
     );
   }
@@ -43,6 +46,5 @@ export default function Avatar({ uri, name, size = 96 }: Props) {
 
 const styles = StyleSheet.create({
   image: { backgroundColor: Colors.border },
-  fallback: { backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
-  initials: { color: Colors.white, fontWeight: '700' },
+  fallback: { alignItems: 'center', justifyContent: 'center' },
 });

@@ -15,7 +15,12 @@ interface Props<T extends string> {
 
 export default function FilterChips<T extends string>({ options, selected, onChange }: Props<T>) {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.scroll}
+      contentContainerStyle={styles.row}
+    >
       {options.map((o) => {
         const active = o.value === selected;
         return (
@@ -33,6 +38,7 @@ export default function FilterChips<T extends string>({ options, selected, onCha
 }
 
 const styles = StyleSheet.create({
+  scroll: { flexGrow: 0 },
   row: { gap: 8, paddingVertical: 4 },
   chip: {
     paddingHorizontal: 16,

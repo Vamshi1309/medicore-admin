@@ -4,4 +4,5 @@ export const Routes = {
   Staff: '/staff',
   Patients: '/patients',
   Profile: '/profile',
+  CreateStaff: '/create-staff',
 } as const;
