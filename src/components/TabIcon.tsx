@@ -22,6 +22,12 @@ export default function TabIcon({ filled, outline, focused, color }: Props) {
 }
 
 const styles = StyleSheet.create({
-    wrap: { paddingHorizontal: 18, paddingVertical: 4, borderRadius: Radius.pill },
+    wrap: {
+        width: 60,
+        height: 32,
+        borderRadius: Radius.pill,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     active: { backgroundColor: Colors.primarySoft },
 });
