@@ -3,6 +3,8 @@ export const Endpoints = {
     refresh: '/auth/refresh',
     me: '/auth/me',
     logout: '/auth/logout',
+    adminStats: '/admin/stats',
+    adminStaff: '/admin/staff',
 } as const;
 
 export const PicsumEndpoints = {

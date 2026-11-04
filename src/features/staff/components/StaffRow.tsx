@@ -3,10 +3,10 @@ import Avatar from '@/components/Avatar';
 import Pill from '@/components/Pill';
 import { Colors } from '@/theme/colors';
 import { Staff } from '../models/staff.types';
-import { ROLE_STYLE } from '../utils/roleStyle';
+import { getRoleStyle } from '../utils/roleStyle';
 
 export default function StaffRow({ staff }: { staff: Staff }) {
-  const role = ROLE_STYLE[staff.role];
+  const role = getRoleStyle(staff.role);
   const statusColor = staff.isActive ? Colors.success : Colors.muted;
 
   return (

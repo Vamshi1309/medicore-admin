@@ -7,8 +7,9 @@ interface Props {
   children: ReactNode;
   centered?: boolean;
   scroll?: boolean;
-  padded?: boolean;   // false = no side or top padding (screen handles its own)
-  safeTop?: boolean;  // false = content may draw behind the status bar
+  padded?: boolean;     // false = no side or top padding (screen handles its own)
+  safeTop?: boolean;    // false = content may draw behind the status bar
+  background?: string;  // screen color, defaults to the app background
 }
 
 export default function ScreenContainer({
@@ -17,11 +18,15 @@ export default function ScreenContainer({
   scroll = true,
   padded = true,
   safeTop = true,
+  background,
 }: Props) {
   const edges: Edge[] = safeTop ? ['top', 'left', 'right'] : [];
 
   return (
-    <SafeAreaView style={styles.safe} edges={edges}>
+    <SafeAreaView
+      style={[styles.safe, background ? { backgroundColor: background } : null]}
+      edges={edges}
+    >
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}

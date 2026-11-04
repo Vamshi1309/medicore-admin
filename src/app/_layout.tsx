@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/core/api/queryClient';
+import ToastHost from '@/components/ToastHost';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,6 +35,7 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
       </Stack>
+      <ToastHost />
     </QueryClientProvider>
   );
 }

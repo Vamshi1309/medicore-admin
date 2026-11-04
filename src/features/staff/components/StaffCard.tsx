@@ -4,7 +4,7 @@ import Pill from '@/components/Pill';
 import { Colors } from '@/theme/colors';
 import { Radius } from '@/theme/radius';
 import { Staff } from '../models/staff.types';
-import { ROLE_STYLE } from '../utils/roleStyle';
+import { getRoleStyle } from '../utils/roleStyle';
 
 interface Props {
   staff: Staff;
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function StaffCard({ staff, onToggle }: Props) {
-  const role = ROLE_STYLE[staff.role];
+  const role = getRoleStyle(staff.role);
 
   return (
     <View style={styles.card}>

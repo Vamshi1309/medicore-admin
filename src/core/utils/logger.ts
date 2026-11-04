@@ -1,7 +1,7 @@
 import { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 const enabled = __DEV__;
-const SENSITIVE = ['password', 'refreshToken', 'accessToken', 'token'];
+const SENSITIVE = ['password', 'temporaryPassword', 'refreshToken', 'accessToken', 'token', 'phoneNumber', 'email'];
 
 const mask = (data: any): any => {
   if (!data || typeof data !== 'object') return data;
