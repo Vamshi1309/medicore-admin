@@ -22,6 +22,7 @@ const toneFor = (id: string) => {
 
 export default function PatientCard({ patient }: { patient: Patient }) {
   const tone = toneFor(patient.id);
+  const hasContact = !!patient.phoneNumber || !!patient.email;
 
   return (
     <View style={styles.card}>
@@ -29,20 +30,26 @@ export default function PatientCard({ patient }: { patient: Patient }) {
         <Avatar name={patient.name} size={52} background={tone.background} textColor={tone.color} />
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{patient.name}</Text>
-          <Text style={styles.joined}>Joined {formatDate(patient.joinedAt)}</Text>
+          {patient.createdAt && (
+            <Text style={styles.joined}>Joined {formatDate(patient.createdAt)}</Text>
+          )}
         </View>
       </View>
 
-      <View style={styles.divider} />
+      {hasContact && <View style={styles.divider} />}
 
-      <View style={styles.row}>
-        <Ionicons name="call-outline" size={16} color={Colors.primary} />
-        <Text style={styles.rowText}>{patient.phone}</Text>
-      </View>
-      <View style={styles.row}>
-        <Ionicons name="mail-outline" size={16} color={Colors.primary} />
-        <Text style={styles.rowText}>{patient.email}</Text>
-      </View>
+      {patient.phoneNumber && (
+        <View style={styles.row}>
+          <Ionicons name="call-outline" size={16} color={Colors.primary} />
+          <Text style={styles.rowText}>{patient.phoneNumber}</Text>
+        </View>
+      )}
+      {patient.email && (
+        <View style={styles.row}>
+          <Ionicons name="mail-outline" size={16} color={Colors.primary} />
+          <Text style={styles.rowText}>{patient.email}</Text>
+        </View>
+      )}
     </View>
   );
 }

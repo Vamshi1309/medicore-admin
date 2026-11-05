@@ -4,6 +4,7 @@ import { ApiResponse } from '@/core/api/types';
 import { toList } from '@/core/api/unwrap';
 import { StaffDto, toStaff } from '../models/staff.dto';
 import { Staff } from '../models/staff.types';
+import { CreateStaffRequest } from '../models/createStaff.types';
 
 type StaffListResponse = ApiResponse<StaffDto[] | { content: StaffDto[] }>;
 
@@ -28,4 +29,8 @@ export const staffRepository = {
   // Returns the whole response so the caller can show the backend's message
   updateStatus: async (id: string, isActive: boolean) =>
     (await apiClient.patch<ApiResponse<unknown>>(Endpoints.adminStaffStatus(id), { isActive })).data,
+
+  // The response type is unverified: `staffId` is read only if the backend sends it
+  create: async (body: CreateStaffRequest) =>
+    (await apiClient.post<ApiResponse<{ staffId?: string } | null>>(Endpoints.adminStaff, body)).data,
 };

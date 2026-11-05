@@ -5,7 +5,7 @@ import { Radius } from '@/theme/radius';
 
 interface Props {
   total: number;
-  newThisMonth: number;
+  newThisMonth?: number;
 }
 
 export default function TotalBanner({ total, newThisMonth }: Props) {
@@ -18,9 +18,11 @@ export default function TotalBanner({ total, newThisMonth }: Props) {
         <Text style={styles.label}>Total patients</Text>
         <Text style={styles.value}>{total.toLocaleString('en-US')}</Text>
       </View>
-      <Text style={styles.month}>
-        <Text style={styles.monthStrong}>+{newThisMonth}</Text> this month
-      </Text>
+      {newThisMonth !== undefined && (
+        <Text style={styles.month}>
+          <Text style={styles.monthStrong}>+{newThisMonth}</Text> this month
+        </Text>
+      )}
     </View>
   );
 }

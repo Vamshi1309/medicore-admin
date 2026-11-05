@@ -6,6 +6,7 @@ export const Endpoints = {
     adminStats: '/admin/stats',
     adminStaff: '/admin/staff',
     adminStaffStatus: (id: string) => `/admin/staff/${id}/status`,
+    patients: '/patient',
 } as const;
 
 export const PicsumEndpoints = {
