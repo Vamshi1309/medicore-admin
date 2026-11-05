@@ -9,9 +9,10 @@ import { getRoleStyle } from '../utils/roleStyle';
 interface Props {
   staff: Staff;
   onToggle: (id: string, value: boolean) => void;
+  disabled?: boolean;
 }
 
-export default function StaffCard({ staff, onToggle }: Props) {
+export default function StaffCard({ staff, onToggle, disabled }: Props) {
   const role = getRoleStyle(staff.role);
 
   return (
@@ -24,6 +25,7 @@ export default function StaffCard({ staff, onToggle }: Props) {
         </View>
         <Switch
           value={staff.isActive}
+          disabled={disabled}
           onValueChange={(v) => onToggle(staff.id, v)}
           trackColor={{ false: Colors.border, true: Colors.success }}
           thumbColor={Colors.white}

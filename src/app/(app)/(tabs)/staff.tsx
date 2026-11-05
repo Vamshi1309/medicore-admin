@@ -1,14 +1,25 @@
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenContainer from '@/components/ScreenContainer';
 import SearchBar from '@/components/SearchBar';
 import FilterChips from '@/components/FilterChips';
 import EmptyState from '@/components/EmptyState';
+import ErrorState from '@/components/ErrorState';
 import StaffCard from '@/features/staff/components/StaffCard';
-import { MOCK_STAFF } from '@/features/staff/mock/staffMock';
-import { Staff, StaffRole } from '@/features/staff/models/staff.types';
+import { useStaffList } from '@/features/staff/hooks/useStaffList';
+import { useToggleStaffStatus } from '@/features/staff/hooks/useToggleStaffStatus';
+import { StaffRole } from '@/features/staff/models/staff.types';
+import { useMe } from '@/features/auth/hooks/useMe';
 import { Routes } from '@/constants/routes';
 import { Colors } from '@/theme/colors';
 
@@ -25,23 +36,36 @@ const FILTERS: { label: string; value: RoleFilter }[] = [
 export default function StaffScreen() {
   const [search, setSearch] = useState('');
   const [role, setRole] = useState<RoleFilter>('ALL');
-  const [staff, setStaff] = useState<Staff[]>(MOCK_STAFF);
+  const [refreshing, setRefreshing] = useState(false);
 
+  const me = useMe();
+  const list = useStaffList();
+  const toggle = useToggleStaffStatus();
+
+  // Search and tabs run in the app
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return staff.filter(
+    return (list.data ?? []).filter(
       (s) =>
         (role === 'ALL' || s.role === role) &&
         (q === '' || s.name.toLowerCase().includes(q) || s.staffId.toLowerCase().includes(q)),
     );
-  }, [staff, search, role]);
+  }, [list.data, search, role]);
 
-  const toggle = (id: string, value: boolean) =>
-    setStaff((list) => list.map((s) => (s.id === id ? { ...s, isActive: value } : s)));
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await list.refetch(); // a failure is reported by the global snackbar
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const hasNoStaff = list.data?.length === 0;
 
   return (
     <ScreenContainer scroll={false}>
-      {/* Fixed part: stays in place while the list scrolls */}
+      {/* Fixed part */}
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <Text style={styles.eyebrow}>TEAM MANAGEMENT</Text>
@@ -59,25 +83,56 @@ export default function StaffScreen() {
         <FilterChips options={FILTERS} selected={role} onChange={setRole} />
       </View>
 
-      <View style={styles.metaRow}>
-        <Text style={styles.meta}>{visible.length} team members</Text>
-        <Text style={styles.meta}>Sorted by newest</Text>
-      </View>
+      {list.data && (
+        <View style={styles.metaRow}>
+          <Text style={styles.meta}>{visible.length} team members</Text>
+          <Text style={styles.meta}>Sorted by newest</Text>
+        </View>
+      )}
 
-      {/* Scrolling part: only the cards */}
-      <FlatList
-        data={visible}
-        keyExtractor={(s) => s.id}
-        renderItem={({ item }) => <StaffCard staff={item} onToggle={toggle} />}
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-        ListEmptyComponent={
-          <EmptyState title="No staff found" message="Try a different name or filter." />
-        }
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 24 }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      />
+      {/* Scrolling part */}
+      {list.isLoading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      ) : list.isError && !list.data ? (
+        <ErrorState message={list.error.message} onRetry={() => list.refetch()} />
+      ) : (
+        <FlatList
+          data={visible}
+          keyExtractor={(s) => s.id}
+          renderItem={({ item }) => (
+            <StaffCard
+              staff={item}
+              onToggle={(id, value) => toggle.mutate({ id, isActive: value })}
+              // Locked while its own request is running, and for the signed-in admin
+              disabled={
+                (toggle.isPending && toggle.variables?.id === item.id) || item.id === me.data?.id
+              }
+            />
+          )}
+          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          ListEmptyComponent={
+            hasNoStaff ? (
+              <EmptyState title="No staff yet" message="Create the first staff account to get started." />
+            ) : (
+              <EmptyState title="No staff found" message="Try a different name or filter." />
+            )
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[Colors.primary]}
+              tintColor={Colors.primary}
+            />
+          }
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 24 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        />
+      )}
     </ScreenContainer>
   );
 }
@@ -98,4 +153,5 @@ const styles = StyleSheet.create({
   createText: { color: Colors.white, fontWeight: '700' },
   metaRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, marginBottom: 10 },
   meta: { color: Colors.muted, fontSize: 12 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });

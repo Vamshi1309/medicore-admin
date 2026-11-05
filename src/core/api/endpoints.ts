@@ -5,6 +5,7 @@ export const Endpoints = {
     logout: '/auth/logout',
     adminStats: '/admin/stats',
     adminStaff: '/admin/staff',
+    adminStaffStatus: (id: string) => `/admin/staff/${id}/status`,
 } as const;
 
 export const PicsumEndpoints = {
